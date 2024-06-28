@@ -17,7 +17,23 @@ Contract
 
 
 
+pragma solidity ^0.5.0;
 
+contract Sharer {
+    function sendHalf(address payable addr) public payable returns (uint balance) {
+        require(msg.value % 2 == 0, "Even value required."); 
+
+        uint balanceBeforeTransfer = address(this).balance; 
+
+        (bool success, ) = addr.call.value(msg.value / 2)(""); 
+        require(success); // Ensure transfer succeeded
+
+        // Assert that contract balance is reduced by exactly half of msg.value
+        assert(address(this).balance == balanceBeforeTransfer - msg.value / 2);
+
+        return address(this).balance; // Return current contract balance
+    }
+}
 
 
 Help
