@@ -1,40 +1,17 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.5.0;
 
-contract ErrorHandlingExample {
-    uint256 public count = 0;
-    address public owner;
+contract Sharer {
+    function sendHalf(address payable addr) public payable returns (uint balance) {
+        require(msg.value % 2 == 0, "Even value required."); 
 
-    constructor() {
-        owner = msg.sender;
-    }
+        uint balanceBeforeTransfer = address(this).balance; 
 
-    function incrementCount(uint256 value) external {
-       
-        require(msg.sender == owner, "Only the contract owner can increment the count");
-        
-       
-        uint256 newCount = count + value;
-        assert(newCount >= count); // Ensure no overflow
-        
-        count = newCount;
-    }
+        (bool success, ) = addr.call.value(msg.value / 2)(""); 
+        require(success); // Ensure transfer succeeded
 
-    function assertExample(uint256 a, uint256 b) external pure returns (uint256) {
-        
-        assert(a != b);
-        
-        return a + b;
-    }
+        // Assert that contract balance is reduced by exactly half of msg.value
+        assert(address(this).balance == balanceBeforeTransfer - msg.value / 2);
 
-    function revertExample(uint256 x) external pure returns (uint256) {
-       
-        require(x > 0, "Input must be greater than zero");
-        
-        if (x == 42) {
-            revert("Input cannot be 42");
-        }
-        
-        return x * 2;
+        return address(this).balance; // Return current contract balance
     }
 }
